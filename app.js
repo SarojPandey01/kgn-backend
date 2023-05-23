@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 
-const db = new sqlite3.Database("test.db", (err) => {
+const db = new sqlite3.Database("test.db", sqlite3.OPEN_READWRITE,(err) => {
   if (err) {
     return console.error(err.message);
   }
