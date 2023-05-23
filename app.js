@@ -81,9 +81,9 @@ function handleLogin() {
     }
   });
 }
-app.get('/',(req,res)=>{
-  res.json({hello:"world"})
-})
+app.get("/", (req, res) => {
+  res.json({ hello: "worldiee" });
+});
 function handleBookTicket() {
   //   let sql = `ALTER TABLE bookings
   // ADD COLUMN busid TEXT`;
