@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "nodemon --exec node app.js"
+    "watch": "nodemon --exec node app.js",
+    "deploy": "firebase deploy --only functions:api"
   },
   "author": "",
   "license": "ISC",
@@ -15,5 +16,8 @@
     "express": "^4.18.2",
     "nodemon": "^2.0.22",
     "sqlite3": "^5.1.6"
+  },
+  "engines": {
+    "node": "18"
   }
 }

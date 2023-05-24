@@ -219,7 +219,7 @@ function searchBus() {
           message: "UNABLE TO FIND BUSES",
           err: err.message,
         });
-      } else {
+      } else { 
         let busList = [];
         rows.forEach((row) => {
           busList.push(row);
