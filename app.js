@@ -2,6 +2,7 @@ const sqlite3 = require("sqlite3").verbose();
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
+const cors = require("cors");
 
 const db = new sqlite3.Database("test.db", sqlite3.OPEN_READWRITE, (err) => {
   if (err) {
@@ -12,6 +13,7 @@ const db = new sqlite3.Database("test.db", sqlite3.OPEN_READWRITE, (err) => {
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 function handleSignup() {
   // let sql =
