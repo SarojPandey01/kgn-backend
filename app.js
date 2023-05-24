@@ -85,9 +85,6 @@ app.get("/", (req, res) => {
   res.json({ hello: "meeee" });
 });
 function handleBookTicket() {
-  //   let sql = `ALTER TABLE bookings
-  // ADD COLUMN busid TEXT`;
-  // db.run(sql);
   app.post("/book", (req, res) => {
     try {
       const { userid, name, source, destination, date, seat, busid } = req.body;
@@ -114,6 +111,36 @@ function handleBookTicket() {
           }
         }
       );
+      //for updating the bus seat list
+      let sql2 = "SELECT reservedSeats from buses WHERE busid=?";
+      let initialSeats = "";
+      db.all(sql2, [busid], (err, row) => {
+        if (err) {
+        } else {
+          initialSeats = row[0]?.reservedSeats.split(" ");
+
+          let seatToBeAdded = seat.split(" ");
+          seatToBeAdded.forEach((seat) => {
+            initialSeats?.push(seat);
+          });
+          let finalSeats = initialSeats?.join(" ");
+          let sql2 = `UPDATE buses SET reservedSeats=? WHERE busid =?`;
+          db.run(sql2, [finalSeats, busid], (err) => {
+            if (err) {
+            } else {
+            }
+          });
+        }
+      });
+      // for updating user data (busid and seats of reserved buses)
+      let sql3 = ` UPDATE users SET reservedBusid=?,reservedSeats=? WHERE userid =?`;
+      db.run(sql3, [busid, seat, userid], (e) => {
+        if (e) {
+          console.error(e.message);
+        } else {
+          console.log("user info updated with latest busid and seat info");
+        }
+      });
     } catch (e) {
       if (e) throw new Error(e);
       res.json({ success: false, message: "Some Error occured" });
@@ -125,11 +152,11 @@ function handleBookTicket() {
 }
 function getUserDataFromUserId(uid, res) {
   let sql = `SELECT Name,Email,phone FROM users WHERE userid=?`;
+
   db.all(sql, [uid], (err, row) => {
     if (!err) {
       if (row[0]) {
         let { Name, Email, phone } = row[0];
-        console.log(uid, Name, Email);
 
         let resp = {
           uid,
