@@ -256,5 +256,4 @@ handleLogin();
 handleBookTicket();
 handleSignup();
 addBus();
-console.log(app.getPath("userData"));
 app.listen(3000);
