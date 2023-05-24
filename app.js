@@ -82,7 +82,7 @@ function handleLogin() {
   });
 }
 app.get("/", (req, res) => {
-  res.json({ hello: "meeee" });
+  res.json({ hello: "worldie" });
 });
 function handleBookTicket() {
   app.post("/book", (req, res) => {
@@ -246,7 +246,7 @@ function searchBus() {
           message: "UNABLE TO FIND BUSES",
           err: err.message,
         });
-      } else {
+      } else { 
         let busList = [];
         rows.forEach((row) => {
           busList.push(row);
