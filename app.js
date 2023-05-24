@@ -238,7 +238,7 @@ function addBus() {
 function searchBus() {
   app.get("/search", (req, res) => {
     const { source, destination, date } = req.body;
-    let sql = "SELECT * FROM buses WHERE source=? AND destination=? AND date=?";
+    let sql = `SELECT * FROM buses WHERE source=? AND destination=? AND date=?`;
     db.all(sql, [source, destination, date], (err, rows) => {
       if (err) {
         res.json({
@@ -246,18 +246,18 @@ function searchBus() {
           message: "UNABLE TO FIND BUSES",
           err: err.message,
         });
-      } else { 
+      } else {
         let busList = [];
         rows.forEach((row) => {
           busList.push(row);
         });
-        res.json({ success: true, buses: busList });
+        res.json({ success: true, buses: rows });
       }
     });
   });
 }
 function getAllBuses() {
-  app.get("/getBuses", (req, res) => {
+  app.get("/getAllBuses", (req, res) => {
     let sql = "SELECT * FROM buses";
     db.all(sql, (err, rows) => {
       if (err) {
@@ -276,7 +276,30 @@ function getAllBuses() {
     });
   });
 }
+function getUserReservations() {
+  app.get("/getUserReservations", (req, res) => {
+    try {
+      const { userid } = req.body;
+      let sql = `SELECT name,busid,seat,date,source,destination from bookings WHERE userid=?`;
+      db.all(sql, [userid], (e, row) => {
+        if (e) {
+          console.error(e.message);
+          res.json({
+            success: false,
+            message: "No reservations",
+            error: e.message,
+          });
+        } else {
+          res.json({ success: true, reservations: row, message: "cool" });
+        }
+      });
+    } catch (error) {
+      resjson({ error });
+    }
+  });
+}
 //todo
+getUserReservations();
 getAllBuses();
 searchBus();
 handleLogin();
