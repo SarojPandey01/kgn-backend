@@ -298,7 +298,24 @@ function getUserReservations() {
     }
   });
 }
+function deleteReservation() {
+  app.get("/deleteReservation", (req, res) => {
+    const { userid, busid } = req.body;
+
+    let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
+    db.run(sql, [userid, busid], (e) => {
+      if (e) {
+        console.log(e.message);
+        res.json({ status: "failure", error: e });
+      } else {
+        res.json({ message: "successful deletion" });
+      }
+    });
+  });
+}
 //todo
+
+deleteReservation();
 getUserReservations();
 getAllBuses();
 searchBus();
