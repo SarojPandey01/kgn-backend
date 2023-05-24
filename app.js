@@ -82,7 +82,7 @@ function handleLogin() {
   });
 }
 app.get("/", (req, res) => {
-  res.json({ hello: "meeee" });
+  res.json({ hello: "worldie" });
 });
 function handleBookTicket() {
   //   let sql = `ALTER TABLE bookings
