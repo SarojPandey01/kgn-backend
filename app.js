@@ -19,12 +19,19 @@ function handleSignup() {
   // let sql =
   //   "CREATE TABLE users (userid INTEGER PRIMARY KEY,Name TEXT, Email TEXT UNIQUE, Password TEXT NOT NULL)";
 
-  app.post("/signup", (req, res) => {
+  app.post("/signup", async (req, res) => {
     try {
       const { id, name, email, password, phone } = req.body;
+      console.log(req.body);
 
       var salt = bcrypt.genSaltSync(10);
       var hashedPassword = bcrypt.hashSync(password, salt);
+      // let hashedPassword = "password";
+      // bcrypt.genSalt(10, function (err, salt) {
+      //   bcrypt.hash(password, salt, function (err, hash) {
+      //     hashedPassword = hash;
+      //   });
+      // });
       let sql =
         "INSERT INTO users(userid,Name, Email, Password,phone) VALUES (?,?,?,?,?)";
       db.run(sql, [id, name, email, hashedPassword, phone], (err) => {
@@ -238,7 +245,7 @@ function addBus() {
   });
 }
 function searchBus() {
-  app.get("/search", (req, res) => {
+  app.post("/search", (req, res) => {
     const { source, destination, date } = req.body;
     let sql = `SELECT * FROM buses WHERE source=? AND destination=? AND date=?`;
     db.all(sql, [source, destination, date], (err, rows) => {
