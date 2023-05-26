@@ -96,12 +96,13 @@ app.get("/", (req, res) => {
 function handleBookTicket() {
   app.post("/book", (req, res) => {
     try {
-      const { userid, name, source, destination, date, seat, busid } = req.body;
+      const { userid, name, source, destination, date, seat, busid, time } =
+        req.body;
       let sql =
-        "INSERT INTO bookings (userid,name,source,destination, date,seat,busid) VALUES (?,?,?,?,?,?,?)";
+        "INSERT INTO bookings (userid,name,source,destination, date,seat,busid,time) VALUES (?,?,?,?,?,?,?,?)";
       db.run(
         sql,
-        [userid, name, source, destination, date, seat, busid],
+        [userid, name, source, destination, date, seat, busid, time],
         (e) => {
           if (e != undefined) {
             res.json({ success: false, message: e });
@@ -116,6 +117,7 @@ function handleBookTicket() {
               destination,
               seat,
               busid,
+              time,
             });
           }
         }
@@ -235,6 +237,12 @@ function addBus() {
           }
         }
       );
+      let sql2 = `INSERT INTO  bookings (time) VALUES (?) WHERE busid=?`;
+      db.run(sql2, [time, busid], (err) => {
+        if (!err) {
+          console.log("time added to bookings");
+        }
+      });
     } catch (e) {
       res.json({
         status: "failure",
@@ -289,7 +297,8 @@ function getUserReservations() {
   app.post("/getUserReservations", (req, res) => {
     try {
       const { userid } = req.body;
-      let sql = `SELECT name,busid,seat,date,source,destination from bookings WHERE userid=?`;
+      let sql = `SELECT name,busid,seat,date,source,destination,time from bookings WHERE userid=?`;
+
       db.all(sql, [userid], (e, row) => {
         if (e) {
           console.error(e.message);
