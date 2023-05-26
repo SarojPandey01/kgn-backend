@@ -128,7 +128,7 @@ function handleBookTicket() {
         } else {
           initialSeats = row[0]?.reservedSeats.split(" ");
 
-          let seatToBeAdded = seat.split(" ");
+          let seatToBeAdded = seat?.split(" ");
           seatToBeAdded.forEach((seat) => {
             initialSeats?.push(seat);
           });
@@ -286,7 +286,7 @@ function getAllBuses() {
   });
 }
 function getUserReservations() {
-  app.get("/getUserReservations", (req, res) => {
+  app.post("/getUserReservations", (req, res) => {
     try {
       const { userid } = req.body;
       let sql = `SELECT name,busid,seat,date,source,destination from bookings WHERE userid=?`;
