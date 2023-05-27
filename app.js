@@ -331,7 +331,6 @@ function deleteReservation() {
     });
   });
 }
-//todo
 
 deleteReservation();
 getUserReservations();
