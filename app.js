@@ -326,7 +326,7 @@ function deleteReservation() {
         console.log(e.message);
         res.json({ status: "failure", error: e });
       } else {
-        res.json({ message: "successful deletion" });
+        res.json({ message: "successful   deletion" });
       }
     });
   });
