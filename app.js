@@ -331,7 +331,7 @@ function deleteReservation() {
     });
   });
 }
-// बहकबकबकबकबकबकमभङभङाचङाङाधमकधमचभझङनाचभधामभधकअध
+
 deleteReservation();
 getUserReservations();
 getAllBuses();
