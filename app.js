@@ -317,7 +317,7 @@ function getUserReservations() {
   });
 }
 function deleteReservation() {
-  app.get("/deleteReservation", (req, res) => {
+  app.post("/deleteReservation", (req, res) => {
     const { userid, busid } = req.body;
 
     let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
