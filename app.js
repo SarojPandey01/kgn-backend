@@ -331,7 +331,7 @@ function deleteReservation() {
     });
   });
 }
-// hello w
+
 deleteReservation();
 getUserReservations();
 getAllBuses();
