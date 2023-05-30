@@ -297,7 +297,7 @@ function getUserReservations() {
   app.post("/getUserReservations", (req, res) => {
     try {
       const { userid } = req.body;
-      let sql = `SELECT name,busid,seat,date,source,destination,time from bookings WHERE userid=?`;
+      let sql = `SELECT name,busid,seat,date,source,destination,time,userid from bookings WHERE userid=?`;
 
       db.all(sql, [userid], (e, row) => {
         if (e) {
