@@ -317,21 +317,48 @@ function getUserReservations() {
   });
 }
 function deleteReservation() {
-  app.post("/deleteReservation", (req, res) => {
+  app.post("/deleteReservation", async (req, res) => {
     const { userid, busid } = req.body;
 
+    let promise = new Promise((resolve, reject) => {
+      let a;
+      let sql1 = `SELECT reservedSeats from buses where busid=?`;
+      db.all(sql1, [busid], (err, row) => {
+        if (!err) {
+          let { reservedSeats } = row[0];
+          resolve(reservedSeats);
+        } else {
+          reject(err.message);
+        }
+        resolve("hi");
+      });
+    });
+    let seats = await promise;
+    console.log(seats);
     let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
-    db.run(sql, [userid, busid], (e) => {
-      if (e) {
-        console.log(e.message);
-        res.json({ status: "failure", error: e });
+    // db.run(sql, [userid, busid], (e) => {
+    //   if (e) {
+    //     console.log(e.message);
+    //     res.json({ status: "failure", error: e });
+    //   } else {
+    //     res.json({ message: "successful   deletion" });
+    //   }
+    // });
+  });
+}
+function getAllBookings() {
+  app.get("/getBookings", (req, res) => {
+    let sql = "SELECT * from bookings";
+    db.all(sql, (err, row) => {
+      if (err) {
+        res.json({ error: err.message });
       } else {
-        res.json({ message: "successful   deletion" });
+        res.json({ success: true, bookings: row });
       }
     });
   });
 }
-
+getAllBookings();
 deleteReservation();
 getUserReservations();
 getAllBuses();
