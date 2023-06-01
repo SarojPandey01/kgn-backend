@@ -318,55 +318,59 @@ function getUserReservations() {
 }
 function deleteReservation() {
   app.post("/deleteReservation", async (req, res) => {
-    const { userid, busid } = req.body;
+    try {
+      const { userid, busid } = req.body;
 
-    let allseats = new Promise((resolve, reject) => {
-      let sql1 = "SELECT seat from bookings WHERE userid=? AND busid=?";
-      db.all(sql1, [userid, busid], (err, row) => {
-        resolve(row[0].seat);
+      let allseats = new Promise((resolve, reject) => {
+        let sql1 = "SELECT seat from bookings WHERE userid=? AND busid=?";
+        db.all(sql1, [userid, busid], (err, row) => {
+          resolve(row[0]?.seat);
+        });
       });
-    });
 
-    // let sql3=`SELECT seat from bookings where busid=? AND userid=?`;
-    let seats = await allseats;
-    // for updating bus seat list
-    let sql2 = "SELECT reservedSeats from buses WHERE busid=?";
+      // let sql3=`SELECT seat from bookings where busid=? AND userid=?`;
+      let seats = await allseats;
+      // for updating bus seat list
+      let sql2 = "SELECT reservedSeats from buses WHERE busid=?";
 
-    let seatPromise = new Promise((resolve, reject) => {
-      db.all(sql2, [busid], (err, row) => {
-        if (err) {
-          throw new Error(err.message);
-        } else {
-          // res.json({ seats, row });
-          let initialSeats = row[0]?.reservedSeats.split(" ");
-          let seatsToBeRemoved = seats.split(" ");
-          for (let i = 0; i < initialSeats.length; i++) {
-            for (let j = 0; j < seatsToBeRemoved.length; j++) {
-              if (initialSeats[i] === seatsToBeRemoved[j]) {
-                initialSeats.splice(i, 1);
+      let seatPromise = new Promise((resolve, reject) => {
+        db.all(sql2, [busid], (err, row) => {
+          if (err) {
+            throw new Error(err.message);
+          } else {
+            // res.json({ seats, row });
+            let initialSeats = row[0]?.reservedSeats.split(" ");
+            let seatsToBeRemoved = seats.split(" ");
+            for (let i = 0; i < initialSeats.length; i++) {
+              for (let j = 0; j < seatsToBeRemoved.length; j++) {
+                if (initialSeats[i] === seatsToBeRemoved[j]) {
+                  initialSeats.splice(i, 1);
+                }
               }
             }
-          }
 
-          resolve(initialSeats.join(" "));
+            resolve(initialSeats.join(" "));
+          }
+        });
+      });
+      let finalSeats = await seatPromise;
+      console.log(seatPromise);
+
+      let sql3 = `UPDATE buses SET reservedSeats=? WHERE busid =?`;
+      db.run(sql3, [finalSeats, busid], (err) => {});
+
+      let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
+      db.run(sql, [userid, busid], (e) => {
+        if (e) {
+          console.log(e.message);
+          res.json({ status: "failure", error: e });
+        } else {
+          res.json({ message: "successful   deletion" });
         }
       });
-    });
-    let finalSeats = await seatPromise;
-    console.log(seatPromise);
-
-    let sql3 = `UPDATE buses SET reservedSeats=? WHERE busid =?`;
-    db.run(sql3, [finalSeats, busid], (err) => {});
-
-    let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
-    db.run(sql, [userid, busid], (e) => {
-      if (e) {
-        console.log(e.message);
-        res.json({ status: "failure", error: e });
-      } else {
-        res.json({ message: "successful   deletion" });
-      }
-    });
+    } catch (e) {
+      res.json({ error: e.message });
+    }
   });
 }
 function getAllBookings() {
@@ -390,4 +394,5 @@ handleLogin();
 handleBookTicket();
 handleSignup();
 addBus();
+// db.run("DELETE FROM users");
 app.listen(3000);
