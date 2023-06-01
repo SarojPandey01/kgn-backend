@@ -14,7 +14,9 @@ const db = new sqlite3.Database("test.db", sqlite3.OPEN_READWRITE, (err) => {
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-
+app.get("/", (req, res) => {
+  res.json({ hello: "worldie" });
+});
 function handleSignup() {
   // let sql =
   //   "CREATE TABLE users (userid INTEGER PRIMARY KEY,Name TEXT, Email TEXT UNIQUE, Password TEXT NOT NULL)";
@@ -90,9 +92,6 @@ function handleLogin() {
     }
   });
 }
-app.get("/", (req, res) => {
-  res.json({ hello: "worldie" });
-});
 function handleBookTicket() {
   app.post("/book", (req, res) => {
     try {
@@ -320,6 +319,7 @@ function deleteReservation() {
   app.post("/deleteReservation", async (req, res) => {
     try {
       const { userid, busid } = req.body;
+      console.log(userid, busid);
 
       let allseats = new Promise((resolve, reject) => {
         let sql1 = "SELECT seat from bookings WHERE userid=? AND busid=?";
@@ -340,16 +340,16 @@ function deleteReservation() {
           } else {
             // res.json({ seats, row });
             let initialSeats = row[0]?.reservedSeats.split(" ");
-            let seatsToBeRemoved = seats.split(" ");
-            for (let i = 0; i < initialSeats.length; i++) {
+            let seatsToBeRemoved = seats?.split(" ");
+            for (let i = 0; i < initialSeats?.length; i++) {
               for (let j = 0; j < seatsToBeRemoved.length; j++) {
                 if (initialSeats[i] === seatsToBeRemoved[j]) {
-                  initialSeats.splice(i, 1);
+                  initialSeats?.splice(i, 1);
                 }
               }
             }
 
-            resolve(initialSeats.join(" "));
+            resolve(initialSeats?.join(" "));
           }
         });
       });
@@ -362,7 +362,6 @@ function deleteReservation() {
       let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
       db.run(sql, [userid, busid], (e) => {
         if (e) {
-          console.log(e.message);
           res.json({ status: "failure", error: e });
         } else {
           res.json({ message: "successful   deletion" });
@@ -385,6 +384,82 @@ function getAllBookings() {
     });
   });
 }
+function getAllUsers() {
+  app.get("/getUsers", (req, res) => {
+    try {
+      let sql = "SELECT * from users";
+      db.all(sql, (err, row) => {
+        if (err) {
+          res.json({ error: e.message });
+        } else {
+          res.json({ users: row });
+        }
+      });
+    } catch (e) {
+      res.json({ e });
+    }
+  });
+}
+function deleteUser() {
+  app.post("/deleteUser", (req, res) => {
+    const { userid } = req.body;
+    try {
+      let sql = "DELETE FROM users where userid=?";
+      db.run(sql, [userid], (e) => {
+        res.json({ message: "success" });
+      });
+    } catch (e) {
+      res.json({ error: e.message });
+    }
+  });
+}
+function sendMessage() {
+  app.post("/sendMessage", (req, res) => {
+    let { name, email, subject, message } = req.body;
+    try {
+      let sql =
+        "INSERT INTO messages (name,email,subject,message) VALUES (?,?,?,?)";
+      db.run(sql, [name, email, subject, message], (e) => {
+        if (!e) {
+          res.json({ success: true });
+        } else {
+          res.json({ success: false });
+        }
+      });
+    } catch (e) {
+      res.json({ e });
+    }
+  });
+}
+function deleteAllMessages() {
+  app.get("/deleteMessages", (req, res) => {
+    let sql = "DELETE FROM messages";
+    db.run(sql, (err) => {
+      if (!err) {
+        res.json({ message: "deleted all" });
+      } else {
+        res.json({ err });
+      }
+    });
+  });
+}
+function getMessages() {
+  app.get("/getMessages", (req, res) => {
+    let sql = "SELECT * FROM messages";
+    db.all(sql, (err, row) => {
+      if (!err) {
+        res.json({ message: "success", messages: row });
+      } else {
+        res.json({ err });
+      }
+    });
+  });
+}
+getMessages();
+deleteAllMessages();
+sendMessage();
+deleteUser();
+getAllUsers();
 getAllBookings();
 deleteReservation();
 getUserReservations();
@@ -394,5 +469,4 @@ handleLogin();
 handleBookTicket();
 handleSignup();
 addBus();
-// db.run("DELETE FROM users");
 app.listen(3000);
