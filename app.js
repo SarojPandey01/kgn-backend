@@ -455,6 +455,19 @@ function getMessages() {
     });
   });
 }
+function deleteAllBuses() {
+  app.get("/deleteAllBuses", (req, res) => {
+    let sql = "DELETE FROM buses";
+    db.run(sql, (e) => {
+      if (!e) {
+        res.json({ success: true });
+      } else {
+        res.json({ success: false });
+      }
+    });
+  });
+}
+deleteAllBuses();
 getMessages();
 deleteAllMessages();
 sendMessage();
