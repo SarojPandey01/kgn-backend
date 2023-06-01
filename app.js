@@ -161,16 +161,16 @@ function handleBookTicket() {
   // let sql =
   //   "CREATE TABLE bookings (userid INTEGER PRIMARY KEY , name TEXT ,source TEXT, destination TEXT, date TEXT,seat TEXT)";
 }
-function getUserDataFromUserId(uid, res) {
+function getUserDataFromUserId(userid, res) {
   let sql = `SELECT Name,Email,phone FROM users WHERE userid=?`;
 
-  db.all(sql, [uid], (err, row) => {
+  db.all(sql, [userid], (err, row) => {
     if (!err) {
       if (row[0]) {
         let { Name, Email, phone } = row[0];
 
         let resp = {
-          uid,
+          userid,
           Name,
           Email,
           phone,
@@ -201,7 +201,7 @@ function addBus() {
   //     console.log("table MNODI");
   //   }
   // );
-  let sql = app.post("/addBus", (req, res) => {
+  app.post("/addBus", (req, res) => {
     try {
       const {
         busid = "9888",
@@ -320,30 +320,53 @@ function deleteReservation() {
   app.post("/deleteReservation", async (req, res) => {
     const { userid, busid } = req.body;
 
-    let promise = new Promise((resolve, reject) => {
-      let a;
-      let sql1 = `SELECT reservedSeats from buses where busid=?`;
-      db.all(sql1, [busid], (err, row) => {
-        if (!err) {
-          let { reservedSeats } = row[0];
-          resolve(reservedSeats);
-        } else {
-          reject(err.message);
-        }
-        resolve("hi");
+    let allseats = new Promise((resolve, reject) => {
+      let sql1 = "SELECT seat from bookings WHERE userid=? AND busid=?";
+      db.all(sql1, [userid, busid], (err, row) => {
+        resolve(row[0].seat);
       });
     });
-    let seats = await promise;
-    console.log(seats);
+
+    // let sql3=`SELECT seat from bookings where busid=? AND userid=?`;
+    let seats = await allseats;
+    // for updating bus seat list
+    let sql2 = "SELECT reservedSeats from buses WHERE busid=?";
+
+    let seatPromise = new Promise((resolve, reject) => {
+      db.all(sql2, [busid], (err, row) => {
+        if (err) {
+          throw new Error(err.message);
+        } else {
+          // res.json({ seats, row });
+          let initialSeats = row[0]?.reservedSeats.split(" ");
+          let seatsToBeRemoved = seats.split(" ");
+          for (let i = 0; i < initialSeats.length; i++) {
+            for (let j = 0; j < seatsToBeRemoved.length; j++) {
+              if (initialSeats[i] === seatsToBeRemoved[j]) {
+                initialSeats.splice(i, 1);
+              }
+            }
+          }
+
+          resolve(initialSeats.join(" "));
+        }
+      });
+    });
+    let finalSeats = await seatPromise;
+    console.log(seatPromise);
+
+    let sql3 = `UPDATE buses SET reservedSeats=? WHERE busid =?`;
+    db.run(sql3, [finalSeats, busid], (err) => {});
+
     let sql = "DELETE FROM bookings WHERE userid=? AND busid=?";
-    // db.run(sql, [userid, busid], (e) => {
-    //   if (e) {
-    //     console.log(e.message);
-    //     res.json({ status: "failure", error: e });
-    //   } else {
-    //     res.json({ message: "successful   deletion" });
-    //   }
-    // });
+    db.run(sql, [userid, busid], (e) => {
+      if (e) {
+        console.log(e.message);
+        res.json({ status: "failure", error: e });
+      } else {
+        res.json({ message: "successful   deletion" });
+      }
+    });
   });
 }
 function getAllBookings() {
