@@ -95,13 +95,36 @@ function handleLogin() {
 function handleBookTicket() {
   app.post("/book", (req, res) => {
     try {
-      const { userid, name, source, destination, date, seat, busid, time } =
-        req.body;
+      const {
+        userid,
+        name,
+        source,
+        destination,
+        date,
+        seat,
+        busid,
+        time,
+        username,
+        phone,
+        email,
+      } = req.body;
       let sql =
-        "INSERT INTO bookings (userid,name,source,destination, date,seat,busid,time) VALUES (?,?,?,?,?,?,?,?)";
+        "INSERT INTO bookings (userid,name,source,destination, date,seat,busid,time,userName,phone,email) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
       db.run(
         sql,
-        [userid, name, source, destination, date, seat, busid, time],
+        [
+          userid,
+          name,
+          source,
+          destination,
+          date,
+          seat,
+          busid,
+          time,
+          username,
+          phone,
+          email,
+        ],
         (e) => {
           if (e != undefined) {
             res.json({ success: false, message: e });
@@ -156,9 +179,6 @@ function handleBookTicket() {
       res.json({ success: false, message: "Some Error occured" });
     }
   });
-
-  // let sql =
-  //   "CREATE TABLE bookings (userid INTEGER PRIMARY KEY , name TEXT ,source TEXT, destination TEXT, date TEXT,seat TEXT)";
 }
 function getUserDataFromUserId(userid, res) {
   let sql = `SELECT Name,Email,phone FROM users WHERE userid=?`;
