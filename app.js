@@ -487,6 +487,60 @@ function deleteAllBuses() {
     });
   });
 }
+function handleForgetPassword() {
+  app.post("/forgot", async (req, res) => {
+    let isMatched = false;
+
+    try {
+      let { email, phone, newPassword } = req.body;
+      // res.json({ email, phone, userid });
+      const getUserData = () =>
+        new Promise((resolve, reject) => {
+          let sql = "SELECT userid from users WHERE email=? and phone=?";
+          db.all(sql, [email, phone], (err, row) => {
+            if (row[0]) {
+              resolve(row[0]);
+              // console.log(row[0]);
+              // res.json({ row });
+            } else {
+              resolve({ userid: null });
+              // res.json({ err: "erroe" });
+            }
+          });
+        });
+      let { userid: uid } = await getUserData();
+      if (uid) {
+        isMatched = true;
+      } else {
+        isMatched = false;
+      }
+      // console.log(uid);
+      // isMatched = !!uid || false;
+      console.log(isMatched);
+      if (isMatched) {
+        let salt = bcrypt.genSaltSync(10);
+        let hashedPassword = bcrypt.hashSync(newPassword, salt);
+        let sql = "UPDATE users SET password=? WHERE userid=?";
+        db.run(sql, [hashedPassword, uid], (e) => {
+          if (!e) {
+            res.json({
+              success: true,
+              message: "Password Updated Successfully",
+            });
+          } else {
+            res.json({ success: false, message: "some error occured" });
+          }
+        });
+      } else {
+        res.json({
+          success: false,
+          message: "Phone number and email doesnot match",
+        });
+      }
+    } catch {}
+  });
+}
+handleForgetPassword();
 deleteAllBuses();
 getMessages();
 deleteAllMessages();
